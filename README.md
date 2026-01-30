@@ -57,9 +57,9 @@ python scripts/cleaner.py input.docx template_clean.docx
 内容生成需要结合学生信息和教学目标。以下是标准流程：
 
 **A. 准备学生信息**
-- 学生姓名：黄灵岚
+- 学生姓名：[学生姓名]
 - 年级：初中三年级
-- 当前水平：嘉定一模 98 分
+- 当前水平：[区域]一模 98 分
 - 目标分数：130 分
 - 薄弱点：阅读 C/D 篇、写作
 - 上课日期：2025-03-05
@@ -92,15 +92,15 @@ results, questions = search_question_bank(
 
 ```json
 {
-  "p_1": "学思堂教育英语学科",
-  "p_2": "黄灵岚专属辅导讲义",
+  "p_1": "[培训机构]英语学科",
+  "p_2": "[学生姓名]专属辅导讲义",
   "t_1": [
     ["学生姓名", "年级", "上课日期", "上课时间", "时长"],
-    ["黄灵岚", "初中三年级", "2025-03-05", "10:00:00", "2h"],
+    ["[学生姓名]", "初中三年级", "2025-03-05", "10:00:00", "2h"],
     ["任课教师", "班主任", "教学组长", "教学主管", "学生签字"],
-    ["陈琪", "李佳欣", "李佳欣", "陆梦玲", ""]
+    ["[教师名]", "[班主任名]", "[教学组长]", "[教学主管]", ""]
   ],
-  "p_32": "【学员诊断】\n黄灵岚同学...",
+  "p_32": "【学员诊断】\n[学生姓名]同学...",
   ...
 }
 ```
@@ -130,7 +130,7 @@ python scripts/builder.py template_clean.docx content.json output.docx
 #### 步骤 2：解析模板结构
 
 ```bash
-python scripts/parser.py "/Users/xxx/templates/lesson_template.docx" > structure.json
+python scripts/parser.py "~/Documents/templates/lesson_template.docx" > structure.json
 ```
 
 查看生成的 `structure.json`，了解模板的段落 ID 和表格结构。
@@ -145,10 +145,10 @@ python scripts/indexer.py
 python << 'PYEOF'
 from scripts.searcher import search_question_bank
 
-# 搜索嘉定区 C 篇阅读
+# 搜索特定区域 C 篇阅读
 results, passages = search_question_bank(
     topic="C篇",
-    district="嘉定",
+    district="[区域]",
     year="2025",
     max_docs=3
 )
@@ -162,25 +162,25 @@ PYEOF
 
 #### 步骤 4：创建内容
 
-基于搜索到的题目和学员信息，创建 `content_huang.json`：
+基于搜索到的题目和学员信息，创建 `content.json`：
 
 ```json
 {
-  "p_1": "学思堂教育英语学科",
-  "p_2": "黄灵岚专属辅导讲义",
+  "p_1": "[培训机构]英语学科",
+  "p_2": "[学生姓名]专属辅导讲义",
   "t_1": [
     ["学生姓名", "年级", "上课日期", "上课时间", "时长"],
-    ["黄灵岚", "初中三年级", "2025-03-05", "10:00:00", "2h"],
+    ["[学生姓名]", "初中三年级", "2025-03-05", "10:00:00", "2h"],
     ["任课教师", "班主任", "教学组长", "教学主管", "学生签字"],
-    ["陈琪", "李佳欣", "李佳欣", "陆梦玲", ""]
+    ["[教师名]", "[班主任名]", "[教学组长]", "[教学主管]", ""]
   ],
   "t_2": [
     ["教学内容", "阅读理解C篇首字母填空突破"],
     ["教学目标", "1. 掌握C篇首字母填空三步法..."],
     ...
   ],
-  "p_32": "【学员诊断与提分策略】\n\n黄灵岚同学现状分析：...",
-  "p_33": "【C篇首字母填空真题精讲】\n\nPassage 1（2024 嘉定一模）...",
+  "p_32": "【学员诊断与提分策略】\n\n[学生姓名]同学现状分析：...",
+  "p_33": "【C篇首字母填空真题精讲】\n\nPassage 1（[年份] [区域]一模）...",
   ...
 }
 ```
@@ -189,9 +189,9 @@ PYEOF
 
 ```bash
 python scripts/builder.py \
-    "/Users/xxx/templates/lesson_template_clean.docx" \
-    "content_huang.json" \
-    "/Users/xxx/output_黄灵岚_C篇突破.docx"
+    "~/Documents/templates/lesson_template_clean.docx" \
+    "content.json" \
+    "~/Documents/output/output_C篇突破.docx"
 ```
 
 ## 📁 项目结构
@@ -244,15 +244,15 @@ doc-processor/
 
 **索引系统**：
 - 首次使用需创建索引：`python scripts/indexer.py`
-- 索引位置：`/Users/xielk/webdata/english/lesson/resource/index.json`
+- 索引位置：`[你的题库路径]/index.json`
 
 **搜索策略**：
-- 优先搜索学员所在区（如嘉定）
+- 优先搜索学员所在区（如[区域名]）
 - 优先搜索最新年份（2025 > 2024 > 2023）
 - 限制加载文件数（3-5个），控制 Token 消耗
 
 **来源标注**：
-- 格式：`(2025 嘉定一模)`、`(2024 徐汇二模)`
+- 格式：`([年份] [区域]一模)`、`([年份] [区域]二模)`
 - 每道题目必须标注来源
 
 ## ⚠️ 常见问题
@@ -307,7 +307,7 @@ python scripts/indexer.py
 # 扩大搜索范围（不限定年份）
 results, questions = search_question_bank(
     topic="非谓语",
-    district="嘉定",
+    district="[区域]",
     year=None  # 搜索所有年份
 )
 ```
